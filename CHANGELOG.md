@@ -1,3 +1,7 @@
+## Edge of 0.2.1
+
+* Support `paranoiac` association — an object who performed deletion - [@SergeyKishenin](https://github.com/SergeyKishenin)
+
 ## 0.2.1 (2015/09/28)
 
 * [#40](https://github.com/simi/mongoid_paranoia/pull/40): Don't override mongoid original update - [@simi](https://github.com/simi).
