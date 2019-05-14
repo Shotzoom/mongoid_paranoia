@@ -43,13 +43,14 @@ You can also access all documents (both deleted and non-deleted) at any time by 
 Person.unscoped.all # Returns all documents, both deleted and non-deleted
 ```
 
-You can also configure the paranoid field naming on a global basis.  Within the context of a Rails app this is done via an initializer.
+You can also configure the paranoid field and paranoiac association naming on a global basis.  Within the context of a Rails app this is done via an initializer.
 
 ```ruby
 # config/initializers/mongoid_paranoid.rb
 
 Mongoid::Paranoia.configure do |c|
   c.paranoid_field = :myFieldName
+  c.paranoiac_association = :myAssocName
 end
 ```
 
@@ -92,6 +93,25 @@ class User
     puts "AROUND - BEFORE"
     yield # restoring
     puts "AROUND - AFTER"
+  end
+end
+```
+
+## Paranoiac association
+
+`Mongoid::Paranoid` supports polymorphic association of an actor who deleted a record. By default it is stored in `deleted_by` association. To store real actor in this association you have to set `Mongoid::Paranoid.paranoiac` attribute with an object (User, Admin etc. instance).
+
+For example, this can be done in `ApplicationController`:
+
+
+```ruby
+class ApplicationController < ActionController::Base
+  before_action :set_paranoiac
+
+  private
+
+  def set_paranoiac
+    Mongoid::Paranoid.paranoiac = current_user if current_user
   end
 end
 ```

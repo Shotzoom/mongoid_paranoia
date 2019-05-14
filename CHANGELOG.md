@@ -1,3 +1,7 @@
+## Edge of 0.3.0
+
+* Support `paranoiac` association — an object who performed deletion - [@SergeyKishenin](https://github.com/SergeyKishenin)
+
 ## 0.3.0
 
 * Mongoid 6.0 support, dropped Mongoid 4/5 and Ruby < 2.2.2
