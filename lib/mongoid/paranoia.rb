@@ -43,7 +43,7 @@ module Mongoid
 
     included do
       field Paranoia.configuration.paranoid_field, as: :deleted_at, type: Time
-      belongs_to Paranoia.configuration.paranoiac_association, polymorphic: true
+      belongs_to Paranoia.configuration.paranoiac_association, polymorphic: true, optional: true
 
       self.paranoid = true
 
