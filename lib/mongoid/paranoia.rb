@@ -20,6 +20,8 @@ module Mongoid
     extend ActiveSupport::Concern
 
     class << self
+      attr_accessor :configuration, :paranoiac
+
       def configuration
         @configuration ||= Configuration.new
       end
@@ -41,6 +43,7 @@ module Mongoid
 
     included do
       field Paranoia.configuration.paranoid_field, as: :deleted_at, type: Time
+      belongs_to Paranoia.configuration.paranoiac_association, polymorphic: true, optional: true
 
       self.paranoid = true
 
@@ -79,8 +82,18 @@ module Mongoid
 
     def remove(_ = {})
       time = self.deleted_at = Time.now
-      _paranoia_update('$set' => { paranoid_field => time })
+
+      deleted_by_id = Paranoia.paranoiac.nil? ? nil : Paranoia.paranoiac.id
+      deleted_by_type = Paranoia.paranoiac.nil? ? nil : Paranoia.paranoiac.class.to_s
+
+      _paranoia_update("$set" => {
+        paranoid_field => time,
+        "#{paranoiac_association}_id" => deleted_by_id,
+        "#{paranoiac_association}_type" => deleted_by_type
+      })
+
       @destroyed = true
+
       true
     end
 
@@ -140,8 +153,16 @@ module Mongoid
     # @since 1.0.0
     def restore(opts = {})
       run_callbacks(:restore) do
-        _paranoia_update('$unset' => { paranoid_field => true })
-        attributes.delete('deleted_at')
+        _paranoia_update("$unset" => {
+          paranoid_field => true,
+          "#{paranoiac_association}_id" => true,
+          "#{paranoiac_association}_type" => true
+        })
+
+        ["deleted_at", "#{paranoiac_association}_id", "#{paranoiac_association}_type"].each do |attribute|
+          attributes.delete(attribute)
+        end
+
         @destroyed = false
         restore_relations if opts[:recursive]
         true
@@ -187,6 +208,13 @@ module Mongoid
       embedded? ? "#{atomic_position}.#{field}" : field
     end
 
+    # Shortcut for Paranoia.configuration.paranoiac_association
+    def paranoiac_association
+      @paranoiac_association ||= Paranoia.configuration.paranoiac_association
+    end
+
+    # Update value in the collection (compatibility layer for Mongoid 4/5).
+    #
     # @return [ Object ] Update result.
     #
     def _paranoia_update(value)

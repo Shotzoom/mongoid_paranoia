@@ -1,3 +1,7 @@
+## Edge
+
+* Support `paranoiac` association — an object who performed deletion - [@SergeyKishenin](https://github.com/SergeyKishenin)
+
 ## 0.5.0 (2021/07/24)
 
 * Support only Mongoid 7.3 and later.
